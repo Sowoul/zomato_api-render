@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .restaurant {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .restaurant img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .restaurant h3 {
+            margin-top: 10px;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-group">
+            <label for="data">Enter your city</label>
+            <input type="text" id="data" name="data">
+            
+        </div>
+        <div class="form-group">
+            <button onclick="postData()">Submit</button>
+        </div>
+        <h1 id="city-name">Restaurants in Udaipur</h1>
+        <div id="restaurant-list">
+            {% for name, image_link in data %}
+            <div class="restaurant">
+                <img src="{{ image_link }}" alt="Restaurant Image">
+                <h3>{{ name }}</h3>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <script>
+        function postData() {
+            const data = document.getElementById('data').value;
+            fetch('/post', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'data=' + encodeURIComponent(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    updateRestaurants(data.city, data.restaurants);
+                } else {
+                    alert('Couldnt find the city.');
+                }
+            });
+        }
+
+        function updateRestaurants(city, restaurants) {
+            document.getElementById('city-name').textContent = 'Restaurants in ' + city;
+            const restaurantList = document.getElementById('restaurant-list');
+            restaurantList.innerHTML = '';
+            restaurants.forEach(({ name, image_link }) => {
+                const restaurantDiv = document.createElement('div');
+                restaurantDiv.className = 'restaurant';
+                restaurantDiv.innerHTML = `
+                    <img src="${image_link}" alt="Restaurant Image">
+                    <h3>${name}</h3>
+                `;
+                restaurantList.appendChild(restaurantDiv);
+            });
+        }
+    </script>
+</body>
+</html>
